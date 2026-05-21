@@ -1,9 +1,19 @@
 <tr class="total-row">
   <td colspan="5" class="label">TOTAL</td>
-  <td class="numero">{{ formatarMoeda(portfolio.totalAquisicao) }}</td>
+  <!-- Coluna 6: Total Aquisição (Azul) -->
+  <td class="numero total-col font-mono">{{ formatarMoeda(totalAquisicao) }}</td>
+  <!-- Coluna 7: Vazia (Cotação do Dia) -->
   <td></td>
-  <td class="numero">{{ formatarMoeda(portfolio.totalValor) }}</td>
-  <td class="numero variacao" [ngClass]="getVariacaoClass()">
-    {{ formatarVariacao(portfolio.variacaoTotal) }}%
+  <!-- Coluna 8: Valor Total (Verde) -->
+  <td class="numero valor-col font-mono">{{ formatarMoeda(totalValor) }}</td>
+  <!-- Coluna 9: Variação Total (%) (Vermelho / Verde / Preto) -->
+  <td class="numero variacao-wrapper">
+    <span class="variacao-badge" [ngClass]="getVariacaoClass()">
+      {{ formatarVariacao(variacaoTotal) }}%
+    </span>
   </td>
+  <!-- Coluna 10: Vazia (Tendência) -->
+  <td></td>
+  <!-- Coluna 11: Vazia (Ações) -->
+  <td></td>
 </tr>

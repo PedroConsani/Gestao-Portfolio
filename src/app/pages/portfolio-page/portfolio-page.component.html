@@ -1,20 +1,196 @@
-<div class="portfolio-container">
-  <header class="portfolio-header">
-    <h1>Monitorização de Carteira de Ações</h1>
-    <button class="btn-refresh" (click)="updateQuotes()" [disabled]="isLoading">
-      {{ isLoading ? 'Actualizando...' : 'Actualizar Cotações' }}
-    </button>
+<div class="portfolio-wrapper animate-fade-in">
+  <!-- Top Header Navigation -->
+  <header class="dashboard-header glass-panel">
+    <div class="header-main">
+      <div class="title-area">
+        <h1>{{ portfolio?.nome || 'Minha Carteira' }}</h1>
+        <div class="metadata">
+          <span class="badge market-badge">{{ portfolio?.mercado || 'MERCADO GLOBAL' }}</span>
+          <span class="last-updated" *ngIf="portfolio?.dataAtualizacao">
+            Atualizado: <strong class="date-text">{{ portfolio?.dataAtualizacao }}</strong>
+          </span>
+        </div>
+      </div>
+      <div class="status-badge-container">
+        <span class="status-badge" [ngClass]="getIsSimulatedMode() ? 'simulated' : 'online'">
+          <span class="status-dot"></span>
+          {{ getIsSimulatedMode() ? 'Modo Simulado' : 'API Real (' + getApiProviderLabel() + ')' }}
+        </span>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="toggleAddForm()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon"><path d="M12 5v14M5 12h14"/></svg>
+        Adicionar Ação
+      </button>
+      <button class="btn btn-secondary" (click)="toggleSettings()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configurar API
+      </button>
+      <button class="btn btn-secondary" (click)="updateQuotes()" [disabled]="isLoading">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon" [ngClass]="{'spin': isLoading}"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        Atualizar
+      </button>
+      <button class="btn btn-danger" (click)="resetPortfolio()" title="Restaurar valores de fábrica">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+        Repor
+      </button>
+    </div>
   </header>
 
-  <div *ngIf="errorMessage" class="error-message">
-    {{ errorMessage }}
+  <!-- Notification Banners -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+    <span>{{ errorMessage }}</span>
   </div>
 
-  <div *ngIf="isLoading" class="loading">
-    <p>Carregando dados...</p>
+  <div *ngIf="successMessage" class="alert alert-success">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="alert-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+    <span>{{ successMessage }}</span>
   </div>
 
-  <div *ngIf="!isLoading">
+  <!-- Dashboard Overview Widgets -->
+  <section class="overview-grid" *ngIf="portfolio">
+    <!-- Widget 1: Valor Total da Carteira -->
+    <div class="widget-card glass-panel card-glow" [ngClass]="(portfolio.variacaoTotal || 0) >= 0 ? 'up' : 'down'">
+      <div class="card-header">
+        <h3>VALOR ATUAL</h3>
+        <span class="icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </span>
+      </div>
+      <div class="card-value font-mono">
+        {{ (portfolio.totalValor || 0).toFixed(2).replace('.', ',') }} <span class="currency">USD</span>
+      </div>
+      <div class="card-footer">
+        <span class="trend-badge" [ngClass]="(portfolio.variacaoTotal || 0) > 0 ? 'up' : ((portfolio.variacaoTotal || 0) < 0 ? 'down' : 'neutral')">
+          <span class="arrow">{{ (portfolio.variacaoTotal || 0) > 0 ? '▲' : ((portfolio.variacaoTotal || 0) < 0 ? '▼' : '■') }}</span>
+          {{ (portfolio.variacaoTotal || 0).toFixed(2).replace('.', ',') }}%
+        </span>
+        <span class="card-footer-lbl">Variação Total</span>
+      </div>
+    </div>
+
+    <!-- Widget 2: Custo de Aquisição -->
+    <div class="widget-card glass-panel">
+      <div class="card-header">
+        <h3>CUSTO DE AQUISIÇÃO</h3>
+        <span class="icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01"/></svg>
+        </span>
+      </div>
+      <div class="card-value font-mono">
+        {{ (portfolio.totalAquisicao || 0).toFixed(2).replace('.', ',') }} <span class="currency">USD</span>
+      </div>
+      <div class="card-footer">
+        <span class="neutral-text font-mono">{{ portfolio.stocks.length }}</span>
+        <span class="card-footer-lbl">Ações Detidas</span>
+      </div>
+    </div>
+
+    <!-- Widget 3: Lucro / Prejuízo Líquido -->
+    <div class="widget-card glass-panel" [ngClass]="((portfolio.totalValor || 0) - (portfolio.totalAquisicao || 0)) >= 0 ? 'up' : 'down'">
+      <div class="card-header">
+        <h3>LUCRO / PREJUÍZO LÍQUIDO</h3>
+        <span class="icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+        </span>
+      </div>
+      <div class="card-value font-mono" [ngClass]="((portfolio.totalValor || 0) - (portfolio.totalAquisicao || 0)) > 0 ? 'color-up' : (((portfolio.totalValor || 0) - (portfolio.totalAquisicao || 0)) < 0 ? 'color-down' : '')">
+        {{ ((portfolio.totalValor || 0) - (portfolio.totalAquisicao || 0) >= 0 ? '+' : '') }}{{ ((portfolio.totalValor || 0) - (portfolio.totalAquisicao || 0)).toFixed(2).replace('.', ',') }} <span class="currency">USD</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-footer-lbl">Retorno Absoluto da Carteira</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Forms Panel -->
+  <div class="forms-wrapper">
+    <!-- Form 1: Configurações de API -->
+    <div class="form-card glass-panel animate-fade-in" *ngIf="showSettings">
+      <div class="form-header">
+        <h2>Definições da API REST</h2>
+        <button class="btn-close" (click)="toggleSettings()">&times;</button>
+      </div>
+      <div class="form-body">
+        <div class="form-group">
+          <label>Modo de Funcionamento</label>
+          <div class="toggle-buttons">
+            <button class="toggle-btn" [ngClass]="{'active': isSimulated}" (click)="isSimulated = true">
+              Simulador Offline (Grátis & Sem Limites)
+            </button>
+            <button class="toggle-btn" [ngClass]="{'active': !isSimulated}" (click)="isSimulated = false">
+              Ligação à API Real (Requer Chave)
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!isSimulated" class="animate-fade-in">
+          <div class="form-group">
+            <label for="provider">Provedor da API de Ações</label>
+            <select id="provider" [(ngModel)]="apiProvider">
+              <option value="alphavantage">AlphaVantage (Global Quote)</option>
+              <option value="finnhub">Finnhub API</option>
+              <option value="marketstack">MarketStack API</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="key">Chave de API (Token / Access Key)</label>
+            <input type="text" id="key" [(ngModel)]="apiKey" placeholder="Introduza a sua chave privada...">
+            <span class="help-text">Obtenha chaves gratuitas nos sites oficiais dos respetivos provedores.</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-secondary" (click)="toggleSettings()">Cancelar</button>
+        <button class="btn btn-primary" (click)="saveSettings()">Gravar Configurações</button>
+      </div>
+    </div>
+
+    <!-- Form 2: Adicionar Ação -->
+    <div class="form-card glass-panel animate-fade-in" *ngIf="showAddForm">
+      <div class="form-header">
+        <h2>Adicionar Transação de Ação</h2>
+        <button class="btn-close" (click)="toggleAddForm()">&times;</button>
+      </div>
+      <div class="form-body grid-2">
+        <div class="form-group">
+          <label for="ticker">Ticker (Símbolo da Ação)</label>
+          <input type="text" id="ticker" [(ngModel)]="newTicker" placeholder="Ex: AAPL, GOOG, NVDA, PETR4" (input)="newTicker = newTicker.toUpperCase()">
+        </div>
+
+        <div class="form-group">
+          <label for="empresa">Nome da Empresa</label>
+          <input type="text" id="empresa" [(ngModel)]="newEmpresa" placeholder="Ex: Apple Inc.">
+        </div>
+
+        <div class="form-group">
+          <label for="quantidade">Quantidade de Títulos (QT)</label>
+          <input type="number" id="quantidade" [(ngModel)]="newQuantidade" placeholder="Ex: 10" min="1" step="1">
+        </div>
+
+        <div class="form-group">
+          <label for="preco">Preço Unitário de Compra (PU USD)</label>
+          <input type="number" id="preco" [(ngModel)]="newPrecoCompra" placeholder="Ex: 150.50" min="0.01" step="0.01">
+        </div>
+
+        <div class="form-group span-2">
+          <label for="data">Data de Compra</label>
+          <input type="date" id="data" [(ngModel)]="newDataCompra">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-secondary" (click)="toggleAddForm()">Cancelar</button>
+        <button class="btn btn-primary" (click)="addStock()">Adicionar ao Portfólio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portfolio Table Component Area -->
+  <main class="dashboard-content">
     <app-portfolio-table></app-portfolio-table>
-  </div>
+  </main>
 </div>

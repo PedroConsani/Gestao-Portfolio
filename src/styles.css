@@ -1,77 +1,175 @@
-/* Global Styles for Portfolio Management Application */
+/* ----------------------------------------------------
+   ★ PREMIUM GLOBAL CSS DESIGN SYSTEM (eToro / DeGiro Style) ★
+   ---------------------------------------------------- */
 
+:root {
+  /* Cores Principais - Tema Escuro por Defeito */
+  --bg-main: #0b0f19;
+  --bg-surface: rgba(22, 28, 45, 0.6);
+  --bg-card: rgba(30, 41, 59, 0.45);
+  --border-color: rgba(255, 255, 255, 0.08);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-glow: rgba(59, 130, 246, 0.35);
+  
+  /* Indicadores de Mercado */
+  --color-up: #10b981;      /* Verde Néon */
+  --bg-up: rgba(16, 185, 129, 0.12);
+  --glow-up: rgba(16, 185, 129, 0.4);
+  
+  --color-down: #ef4444;    /* Vermelho Néon */
+  --bg-down: rgba(239, 68, 68, 0.12);
+  --glow-down: rgba(239, 68, 68, 0.4);
+  
+  --color-neutral: #94a3b8; /* Cinzento */
+  --bg-neutral: rgba(148, 163, 184, 0.12);
+  
+  /* Fontes */
+  --font-ui: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+  --font-data: 'JetBrains Mono', 'Courier New', monospace;
+  
+  /* Sombras e Efeitos */
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --backdrop-blur: blur(16px);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset Geral */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-html,
 body {
-  height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
 }
 
+/* Scrollbar Premium */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 2px solid var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Componente Base Root */
 app-root {
   display: block;
-  height: 100%;
+  min-height: 100vh;
 }
 
-/* Button Styles */
+/* Estilo para Foco e Acessibilidade */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Glassmorphism Card Utility */
+.glass-panel {
+  background: var(--bg-surface);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  transition: var(--transition-smooth);
+}
+
+/* Inputs Premium */
+input, select {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  transition: var(--transition-smooth);
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Botões Premium */
 button {
-  font-family: inherit;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
   border: none;
   outline: none;
-  transition: all 0.3s ease;
+  transition: var(--transition-smooth);
 }
 
 button:active {
   transform: scale(0.98);
 }
 
-/* Table Base Styles */
-table {
-  border-collapse: collapse;
-  width: 100%;
+/* Micro Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Utility Classes */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
-.text-center {
-  text-align: center;
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.text-right {
-  text-align: right;
+/* Responsividade Global */
+@media (max-width: 1024px) {
+  .container {
+    padding: 15px;
+  }
 }
 
-.mt {
-  margin-top: 20px;
-}
-
-.mb {
-  margin-bottom: 20px;
-}
-
-.p {
-  padding: 20px;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
   body {
     font-size: 14px;
-  }
-
-  .container {
-    padding: 10px;
   }
 }

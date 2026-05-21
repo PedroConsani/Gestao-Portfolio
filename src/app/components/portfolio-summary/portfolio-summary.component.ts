@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Portfolio } from '../../models/portfolio';
 
 @Component({
   selector: 'app-portfolio-summary',
@@ -10,31 +9,32 @@ import { Portfolio } from '../../models/portfolio';
   styleUrls: ['./portfolio-summary.component.css']
 })
 export class PortfolioSummaryComponent {
-  @Input() portfolio!: Portfolio;
+  @Input() totalAquisicao = 0;
+  @Input() totalValor = 0;
+  @Input() variacaoTotal = 0;
 
   /**
    * Retorna a classe CSS baseada na variação total
    */
   getVariacaoClass(): string {
-    if (!this.portfolio.variacaoTotal) return 'neutro';
-    if (this.portfolio.variacaoTotal > 0) return 'positivo';
-    if (this.portfolio.variacaoTotal < 0) return 'negativo';
+    if (!this.variacaoTotal) return 'neutro';
+    if (this.variacaoTotal > 0) return 'positivo';
+    if (this.variacaoTotal < 0) return 'negativo';
     return 'neutro';
   }
 
   /**
    * Formata um número como moeda
    */
-  formatarMoeda(valor: number | undefined): string {
-    if (valor === undefined) return '-';
+  formatarMoeda(valor: number): string {
     return valor.toFixed(2).replace('.', ',');
   }
 
   /**
-   * Formata a variação com 2 casas decimais
+   * Formata a variação com 2 casas decimais e sinal de + se for positiva
    */
-  formatarVariacao(valor: number | undefined): string {
-    if (valor === undefined) return '-';
-    return valor.toFixed(2).replace('.', ',');
+  formatarVariacao(valor: number): string {
+    const formatted = valor.toFixed(2).replace('.', ',');
+    return valor > 0 ? `+${formatted}` : formatted;
   }
 }

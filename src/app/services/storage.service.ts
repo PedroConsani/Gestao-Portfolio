@@ -56,4 +56,32 @@ export class StorageService {
   hasPortfolio(): boolean {
     return localStorage.getItem(this.STORAGE_KEY) !== null;
   }
+
+  /**
+   * Guarda as configurações da API no localStorage
+   */
+  saveApiSettings(provider: string, apiKey: string, isSimulated: boolean): void {
+    try {
+      const settings = { provider, apiKey, isSimulated };
+      localStorage.setItem('portfolio_api_settings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Erro ao guardar configurações de API:', error);
+    }
+  }
+
+  /**
+   * Carrega as configurações da API do localStorage
+   */
+  loadApiSettings(): { provider: string; apiKey: string; isSimulated: boolean } | null {
+    try {
+      const settings = localStorage.getItem('portfolio_api_settings');
+      if (settings) {
+        return JSON.parse(settings);
+      }
+      return null;
+    } catch (error) {
+      console.error('Erro ao carregar configurações de API:', error);
+      return null;
+    }
+  }
 }

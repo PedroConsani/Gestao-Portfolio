@@ -1,26 +1,72 @@
-<div class="table-container" *ngIf="portfolio">
-  <table class="portfolio-table">
-    <thead>
-      <tr>
-        <th>Ticker</th>
-        <th>Empresa</th>
-        <th>Data da Compra</th>
-        <th>QT</th>
-        <th>PU</th>
-        <th>Total</th>
-        <th>Cotação do Dia</th>
-        <th>Valor</th>
-        <th>Variação (%)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <app-stock-row 
-        *ngFor="let stock of portfolio.stocks" 
-        [stock]="stock">
-      </app-stock-row>
-    </tbody>
-    <tfoot>
-      <app-portfolio-summary [portfolio]="portfolio"></app-portfolio-summary>
-    </tfoot>
-  </table>
+<div class="table-container-outer" *ngIf="portfolio">
+  <!-- Search/Filter Bar -->
+  <div class="table-actions-bar">
+    <div class="search-input-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" [(ngModel)]="searchTerm" placeholder="Pesquisar por Ticker ou Empresa...">
+      <button class="clear-search-btn" *ngIf="searchTerm" (click)="searchTerm = ''" title="Limpar pesquisa">&times;</button>
+    </div>
+    <div class="stocks-count">
+      Mostrando <strong>{{ filteredStocks.length }}</strong> de <strong>{{ portfolio.stocks.length }}</strong> posições
+    </div>
+  </div>
+
+  <!-- Main Stocks Table -->
+  <div class="glass-panel table-scroll-wrapper">
+    <table class="portfolio-table">
+      <thead>
+        <tr>
+          <th (click)="sortBy('ticker')" class="sortable" [ngClass]="{'active': sortColumn === 'ticker'}">
+            Ticker <span class="sort-icon">{{ sortColumn === 'ticker' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <th (click)="sortBy('empresa')" class="sortable" [ngClass]="{'active': sortColumn === 'empresa'}">
+            Empresa <span class="sort-icon">{{ sortColumn === 'empresa' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <th (click)="sortBy('dataCompra')" class="sortable" [ngClass]="{'active': sortColumn === 'dataCompra'}">
+            Data da Compra <span class="sort-icon">{{ sortColumn === 'dataCompra' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <th (click)="sortBy('quantidade')" class="sortable num" [ngClass]="{'active': sortColumn === 'quantidade'}">
+            QT <span class="sort-icon">{{ sortColumn === 'quantidade' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <th (click)="sortBy('precoCompra')" class="sortable num" [ngClass]="{'active': sortColumn === 'precoCompra'}">
+            PU (USD) <span class="sort-icon">{{ sortColumn === 'precoCompra' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <!-- Coluna Calculada: Total (Azul) -->
+          <th (click)="sortBy('total')" class="sortable num total-col" [ngClass]="{'active': sortColumn === 'total'}">
+            Total (USD) <span class="sort-icon">{{ sortColumn === 'total' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <th (click)="sortBy('cotacaoDia')" class="sortable num" [ngClass]="{'active': sortColumn === 'cotacaoDia'}">
+            Cotação do Dia <span class="sort-icon">{{ sortColumn === 'cotacaoDia' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <!-- Coluna Calculada: Valor (Verde) -->
+          <th (click)="sortBy('valor')" class="sortable num valor-col" [ngClass]="{'active': sortColumn === 'valor'}">
+            Valor (USD) <span class="sort-icon">{{ sortColumn === 'valor' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <th (click)="sortBy('variacao')" class="sortable num" [ngClass]="{'active': sortColumn === 'variacao'}">
+            Variação (%) <span class="sort-icon">{{ sortColumn === 'variacao' ? (sortDirection === 'asc' ? '▲' : '▼') : '↕' }}</span>
+          </th>
+          <th class="actions-header">Ações</th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        <tr *ngIf="filteredStocks.length === 0" class="empty-row">
+          <td colspan="10" class="text-center">Nenhuma ação encontrada para os filtros aplicados.</td>
+        </tr>
+        <app-stock-row 
+          *ngFor="let stock of filteredStocks" 
+          [stock]="stock"
+          class="table-row-animate">
+        </app-stock-row>
+      </tbody>
+      
+      <tfoot>
+        <app-portfolio-summary 
+          [totalAquisicao]="filteredSummary.totalAquisicao"
+          [totalValor]="filteredSummary.totalValor"
+          [variacaoTotal]="filteredSummary.variacaoTotal">
+        </app-portfolio-summary>
+      </tfoot>
+    </table>
+  </div>
 </div>

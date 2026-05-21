@@ -1,40 +1,142 @@
+/* ----------------------------------------------------
+   ★ STOCK ROW COMPONENT CSS ★
+   ---------------------------------------------------- */
+
+:host {
+  display: table-row-group;
+}
+
+tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: var(--transition-smooth);
+}
+
+tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+td {
+  padding: 16px;
+  vertical-align: middle;
+}
+
 .ticker {
-  font-weight: 600;
-  color: #1976d2;
-  font-size: 0.95em;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.5px;
 }
 
 .empresa {
-  color: #333;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 .data {
-  color: #666;
-  font-size: 0.9em;
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 .numero {
-  font-family: 'Courier New', monospace;
-  color: #333;
+  text-align: right;
+  font-family: var(--font-data);
+  font-size: 0.95rem;
+  color: var(--text-primary);
 }
 
-.variacao {
+/* Destaque das colunas calculadas pedidas no enunciado */
+.total-col {
+  background: rgba(59, 130, 246, 0.08) !important;
+  color: #93c5fd !important;
   font-weight: 600;
-  border-radius: 4px;
-  padding: 5px;
 }
 
-.variacao.positivo {
-  background-color: #c8e6c9;
-  color: #2e7d32;
+.valor-col {
+  background: rgba(16, 185, 129, 0.08) !important;
+  color: #6ee7b7 !important;
+  font-weight: 600;
 }
 
-.variacao.negativo {
-  background-color: #ffcdd2;
-  color: #c62828;
+/* Variação Badges com glow estético */
+.variacao-wrapper {
+  text-align: right;
 }
 
-.variacao.neutro {
-  background-color: #f5f5f5;
-  color: #333;
+.variacao-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--font-data);
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 75px;
+  text-align: center;
+}
+
+.variacao-badge.positivo {
+  background: var(--bg-up);
+  color: var(--color-up);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+}
+
+.variacao-badge.negativo {
+  background: var(--bg-down);
+  color: var(--color-down);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.1);
+}
+
+.variacao-badge.neutro {
+  background: var(--bg-neutral);
+  color: var(--color-neutral);
+}
+
+/* Sparkline Trend Graph */
+.sparkline-wrapper {
+  text-align: center;
+  width: 90px;
+}
+
+.sparkline-svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.sparkline-svg.positivo {
+  color: var(--color-up);
+  filter: drop-shadow(0 0 2px var(--glow-up));
+}
+
+.sparkline-svg.negativo {
+  color: var(--color-down);
+  filter: drop-shadow(0 0 2px var(--glow-down));
+}
+
+.sparkline-svg.neutro {
+  color: var(--color-neutral);
+}
+
+/* Actions Column & Delete Button */
+.actions-col {
+  text-align: center;
+  width: 60px;
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  transform: scale(1.1);
+}
+
+.delete-icon {
+  width: 16px;
+  height: 16px;
 }

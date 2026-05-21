@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Portfolio } from '../models/portfolio';
 import { Stock } from '../models/stock';
 import { StockApiService } from './stock-api.service';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,10 @@ export class PortfolioService {
   private portfolioSubject = new BehaviorSubject<Portfolio | null>(null);
   public portfolio$ = this.portfolioSubject.asObservable();
 
-  constructor(private stockApiService: StockApiService) { }
+  constructor(
+    private stockApiService: StockApiService,
+    private storageService: StorageService
+  ) { }
 
   /**
    * Carrega a carteira a partir de um ficheiro JSON
@@ -24,7 +28,10 @@ export class PortfolioService {
         .then((data: any) => {
           const portfolio = data as Portfolio;
           portfolio.dataAtualizacao = new Date().toISOString().split('T')[0];
+          // Calcular valores iniciais (cotação do dia = preço de compra se não houver cotação ainda)
+          this.calculatePortfolioValues(portfolio);
           this.portfolioSubject.next(portfolio);
+          this.storageService.savePortfolio(portfolio);
           observer.next(portfolio);
           observer.complete();
         })
@@ -47,20 +54,32 @@ export class PortfolioService {
         return;
       }
 
+      if (portfolio.stocks.length === 0) {
+        portfolio.dataAtualizacao = new Date().toISOString().split('T')[0];
+        this.calculatePortfolioValues(portfolio);
+        this.portfolioSubject.next(portfolio);
+        this.storageService.savePortfolio(portfolio);
+        observer.next(portfolio);
+        observer.complete();
+        return;
+      }
+
       const tickers = portfolio.stocks.map((s: Stock) => s.ticker);
 
       this.stockApiService.getStockQuotes(tickers).subscribe({
         next: (quotes: any[]) => {
           portfolio.stocks.forEach((stock: Stock) => {
-            const quote = quotes.find((q: any) => q.ticker === stock.ticker);
+            const quote = quotes.find((q: any) => q.ticker.toUpperCase() === stock.ticker.toUpperCase());
             if (quote) {
               stock.cotacaoDia = quote.price;
             }
           });
 
-          // Calcular valores
+          // Calcular valores e atualizar data
+          portfolio.dataAtualizacao = new Date().toISOString().split('T')[0];
           this.calculatePortfolioValues(portfolio);
           this.portfolioSubject.next(portfolio);
+          this.storageService.savePortfolio(portfolio);
           observer.next(portfolio);
           observer.complete();
         },
@@ -91,7 +110,7 @@ export class PortfolioService {
 
       // Variação em percentagem
       const diferencaValor = stock.valor - stock.total;
-      stock.variacao = (diferencaValor / stock.total) * 100;
+      stock.variacao = stock.total > 0 ? (diferencaValor / stock.total) * 100 : 0;
     });
 
     // Calcular totais da carteira
@@ -99,7 +118,7 @@ export class PortfolioService {
     portfolio.totalValor = portfolio.stocks.reduce((sum, stock) => sum + (stock.valor || 0), 0);
 
     const diferencaTotal = portfolio.totalValor - portfolio.totalAquisicao;
-    portfolio.variacaoTotal = (diferencaTotal / portfolio.totalAquisicao) * 100;
+    portfolio.variacaoTotal = portfolio.totalAquisicao > 0 ? (diferencaTotal / portfolio.totalAquisicao) * 100 : 0;
   }
 
   /**
@@ -108,9 +127,18 @@ export class PortfolioService {
   addStock(stock: Stock): void {
     const portfolio = this.portfolioSubject.value;
     if (portfolio) {
-      portfolio.stocks.push(stock);
+      const existing = portfolio.stocks.find(s => s.ticker.toUpperCase() === stock.ticker.toUpperCase());
+      if (existing) {
+        const novaQtd = existing.quantidade + stock.quantidade;
+        existing.precoCompra = ((existing.quantidade * existing.precoCompra) + (stock.quantidade * stock.precoCompra)) / novaQtd;
+        existing.quantidade = novaQtd;
+        existing.cotacaoDia = undefined; // Forçar recálculo da cotação
+      } else {
+        portfolio.stocks.push(stock);
+      }
       this.calculatePortfolioValues(portfolio);
       this.portfolioSubject.next(portfolio);
+      this.storageService.savePortfolio(portfolio);
     }
   }
 
@@ -120,10 +148,19 @@ export class PortfolioService {
   removeStock(ticker: string): void {
     const portfolio = this.portfolioSubject.value;
     if (portfolio) {
-      portfolio.stocks = portfolio.stocks.filter((s: Stock) => s.ticker !== ticker);
+      portfolio.stocks = portfolio.stocks.filter((s: Stock) => s.ticker.toUpperCase() !== ticker.toUpperCase());
       this.calculatePortfolioValues(portfolio);
       this.portfolioSubject.next(portfolio);
+      this.storageService.savePortfolio(portfolio);
     }
+  }
+
+  /**
+   * Repõe os dados iniciais do ficheiro JSON
+   */
+  resetPortfolio(): Observable<Portfolio> {
+    this.storageService.clearPortfolio();
+    return this.loadPortfolioFromFile('assets/data/portfolio.json');
   }
 
   /**
@@ -139,5 +176,6 @@ export class PortfolioService {
   setPortfolio(portfolio: Portfolio): void {
     this.calculatePortfolioValues(portfolio);
     this.portfolioSubject.next(portfolio);
+    this.storageService.savePortfolio(portfolio);
   }
 }

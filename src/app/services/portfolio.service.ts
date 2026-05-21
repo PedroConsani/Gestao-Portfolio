@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { switchMap, tap, catchError } from 'rxjs/operators';
 import { Portfolio } from '../models/portfolio';
 import { Stock } from '../models/stock';
 import { StockApiService } from './stock-api.service';
@@ -13,33 +15,64 @@ export class PortfolioService {
   public portfolio$ = this.portfolioSubject.asObservable();
 
   constructor(
+    private http: HttpClient,
     private stockApiService: StockApiService,
     private storageService: StorageService
   ) { }
 
   /**
-   * Carrega a carteira a partir de um ficheiro JSON
-   * @param filePath Caminho do ficheiro JSON
+   * Carrega a carteira a partir do backend MongoDB.
+   * Se não existir no backend, tenta carregar do ficheiro JSON local.
    */
   loadPortfolioFromFile(filePath: string): Observable<Portfolio> {
     return new Observable<Portfolio>((observer) => {
-      fetch(filePath)
-        .then(response => response.json())
-        .then((data: any) => {
-          const portfolio = data as Portfolio;
-          portfolio.dataAtualizacao = new Date().toISOString().split('T')[0];
-          // Calcular valores iniciais (cotação do dia = preço de compra se não houver cotação ainda)
-          this.calculatePortfolioValues(portfolio);
-          this.portfolioSubject.next(portfolio);
-          this.storageService.savePortfolio(portfolio);
-          observer.next(portfolio);
-          observer.complete();
-        })
-        .catch((error: any) => {
-          console.error('Erro ao carregar portfolio:', error);
-          observer.error(error);
-        });
+      // Primeiro tentar carregar do MongoDB via backend
+      this.storageService.loadPortfolio().subscribe({
+        next: (portfolio) => {
+          if (portfolio && portfolio.stocks && portfolio.stocks.length > 0) {
+            portfolio.dataAtualizacao = new Date().toISOString().split('T')[0];
+            this.calculatePortfolioValues(portfolio);
+            this.portfolioSubject.next(portfolio);
+            observer.next(portfolio);
+            observer.complete();
+          } else {
+            // Se não há dados no MongoDB, carregar do ficheiro JSON
+            this.loadFromJsonFile(filePath, observer);
+          }
+        },
+        error: () => {
+          // Fallback: carregar do ficheiro JSON
+          this.loadFromJsonFile(filePath, observer);
+        }
+      });
     });
+  }
+
+  /**
+   * Carrega do ficheiro JSON local e guarda no MongoDB
+   */
+  private loadFromJsonFile(filePath: string, observer: any): void {
+    fetch(filePath)
+      .then(response => response.json())
+      .then((data: any) => {
+        const portfolio = data as Portfolio;
+        portfolio.dataAtualizacao = new Date().toISOString().split('T')[0];
+        this.calculatePortfolioValues(portfolio);
+        this.portfolioSubject.next(portfolio);
+
+        // Guardar no MongoDB
+        this.storageService.savePortfolio(portfolio).subscribe({
+          next: () => console.log('Carteira guardada no MongoDB'),
+          error: (err) => console.error('Erro ao guardar no MongoDB:', err)
+        });
+
+        observer.next(portfolio);
+        observer.complete();
+      })
+      .catch((error: any) => {
+        console.error('Erro ao carregar portfolio:', error);
+        observer.error(error);
+      });
   }
 
   /**
@@ -58,7 +91,7 @@ export class PortfolioService {
         portfolio.dataAtualizacao = new Date().toISOString().split('T')[0];
         this.calculatePortfolioValues(portfolio);
         this.portfolioSubject.next(portfolio);
-        this.storageService.savePortfolio(portfolio);
+        this.storageService.savePortfolio(portfolio).subscribe();
         observer.next(portfolio);
         observer.complete();
         return;
@@ -79,7 +112,13 @@ export class PortfolioService {
           portfolio.dataAtualizacao = new Date().toISOString().split('T')[0];
           this.calculatePortfolioValues(portfolio);
           this.portfolioSubject.next(portfolio);
-          this.storageService.savePortfolio(portfolio);
+
+          // Guardar no MongoDB (assíncrono)
+          this.storageService.savePortfolio(portfolio).subscribe({
+            next: () => {},
+            error: (err) => console.error('Erro ao guardar cotações no MongoDB:', err)
+          });
+
           observer.next(portfolio);
           observer.complete();
         },
@@ -101,7 +140,7 @@ export class PortfolioService {
       stock.total = stock.quantidade * stock.precoCompra;
 
       // Se a cotação do dia não está definida, usar preço de compra
-      if (stock.cotacaoDia === undefined) {
+      if (stock.cotacaoDia === undefined || stock.cotacaoDia === null) {
         stock.cotacaoDia = stock.precoCompra;
       }
 
@@ -138,7 +177,12 @@ export class PortfolioService {
       }
       this.calculatePortfolioValues(portfolio);
       this.portfolioSubject.next(portfolio);
-      this.storageService.savePortfolio(portfolio);
+
+      // Guardar no MongoDB (assíncrono)
+      this.storageService.savePortfolio(portfolio).subscribe({
+        next: () => console.log('Stock adicionado e guardado no MongoDB'),
+        error: (err) => console.error('Erro ao guardar stock no MongoDB:', err)
+      });
     }
   }
 
@@ -151,16 +195,44 @@ export class PortfolioService {
       portfolio.stocks = portfolio.stocks.filter((s: Stock) => s.ticker.toUpperCase() !== ticker.toUpperCase());
       this.calculatePortfolioValues(portfolio);
       this.portfolioSubject.next(portfolio);
-      this.storageService.savePortfolio(portfolio);
+
+      // Guardar no MongoDB (assíncrono)
+      this.storageService.savePortfolio(portfolio).subscribe({
+        next: () => console.log('Stock removido e guardado no MongoDB'),
+        error: (err) => console.error('Erro ao guardar após remover stock:', err)
+      });
     }
   }
 
   /**
-   * Repõe os dados iniciais do ficheiro JSON
+   * Repõe os dados iniciais — pede ao backend para fazer reset
    */
   resetPortfolio(): Observable<Portfolio> {
-    this.storageService.clearPortfolio();
-    return this.loadPortfolioFromFile('assets/data/portfolio.json');
+    return new Observable<Portfolio>((observer) => {
+      this.storageService.clearPortfolio().subscribe({
+        next: (portfolio) => {
+          if (portfolio) {
+            this.calculatePortfolioValues(portfolio);
+            this.portfolioSubject.next(portfolio);
+            observer.next(portfolio);
+            observer.complete();
+          } else {
+            // Fallback: carregar do ficheiro JSON
+            this.loadPortfolioFromFile('assets/data/portfolio.json').subscribe({
+              next: (p) => {
+                observer.next(p);
+                observer.complete();
+              },
+              error: (err) => observer.error(err)
+            });
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao repor carteira:', err);
+          observer.error(err);
+        }
+      });
+    });
   }
 
   /**
@@ -176,6 +248,11 @@ export class PortfolioService {
   setPortfolio(portfolio: Portfolio): void {
     this.calculatePortfolioValues(portfolio);
     this.portfolioSubject.next(portfolio);
-    this.storageService.savePortfolio(portfolio);
+
+    // Guardar no MongoDB (assíncrono)
+    this.storageService.savePortfolio(portfolio).subscribe({
+      next: () => {},
+      error: (err) => console.error('Erro ao guardar carteira no MongoDB:', err)
+    });
   }
 }

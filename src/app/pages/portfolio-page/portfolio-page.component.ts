@@ -54,35 +54,29 @@ export class PortfolioPageComponent implements OnInit {
       this.portfolio = portfolio;
     });
 
-    // Inicializar a carteira
+    // Inicializar a carteira (agora carrega do MongoDB)
     this.initializePortfolio();
   }
 
   /**
-   * Inicializa a carteira ao carregar
+   * Inicializa a carteira ao carregar — agora carrega do MongoDB via backend
    */
   private initializePortfolio(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const savedPortfolio = this.storageService.loadPortfolio();
-    if (savedPortfolio) {
-      this.portfolioService.setPortfolio(savedPortfolio);
-      this.isLoading = false;
-      // Atualizar cotações em background para ter dados frescos
-      this.updateQuotes(true);
-    } else {
-      this.portfolioService.loadPortfolioFromFile('assets/data/portfolio.json').subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.updateQuotes();
-        },
-        error: (err) => {
-          this.isLoading = false;
-          this.errorMessage = 'Erro ao carregar carteira base: ' + err.message;
-        }
-      });
-    }
+    // Carregar do MongoDB (o serviço já faz fallback para JSON se necessário)
+    this.portfolioService.loadPortfolioFromFile('assets/data/portfolio.json').subscribe({
+      next: () => {
+        this.isLoading = false;
+        // Atualizar cotações em background
+        this.updateQuotes(true);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = 'Erro ao carregar carteira: ' + (err.message || err);
+      }
+    });
   }
 
   /**
@@ -168,7 +162,7 @@ export class PortfolioPageComponent implements OnInit {
    * Reinicia a carteira para o estado padrão
    */
   resetPortfolio(): void {
-    if (confirm('Tem a certeza que deseja repor a carteira padrão do ficheiro JSON? Isto apagará todas as edições locais.')) {
+    if (confirm('Tem a certeza que deseja repor a carteira padrão? Isto apagará todas as edições.')) {
       this.isLoading = true;
       this.portfolioService.resetPortfolio().subscribe({
         next: () => {
@@ -178,7 +172,7 @@ export class PortfolioPageComponent implements OnInit {
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = 'Erro ao restaurar carteira: ' + err.message;
+          this.errorMessage = 'Erro ao restaurar carteira: ' + (err.message || err);
         }
       });
     }

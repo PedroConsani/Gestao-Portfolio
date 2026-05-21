@@ -2,7 +2,8 @@ export const environment = {
   production: false,
   apiProvider: 'alphavantage', // Opções: 'alphavantage', 'finnhub', 'marketstack'
   apiKey: 'YOUR_API_KEY_HERE', // Substituir com a sua chave de API
-  apiUrl: 'https://www.alphavantage.co/query' // URL base da API
+  apiUrl: 'https://www.alphavantage.co/query', // URL base da API
+  backendUrl: 'http://localhost:3000/api' // URL do backend Express/MongoDB
 };
 
 // Instruções de configuração:

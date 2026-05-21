@@ -30,3 +30,7 @@ Thumbs.db
 
 # Angular
 .angular/
+
+# Server (Backend)
+server/node_modules/
+server/.env

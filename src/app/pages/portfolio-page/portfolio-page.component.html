@@ -1,0 +1,20 @@
+<div class="portfolio-container">
+  <header class="portfolio-header">
+    <h1>Monitorização de Carteira de Ações</h1>
+    <button class="btn-refresh" (click)="updateQuotes()" [disabled]="isLoading">
+      {{ isLoading ? 'Actualizando...' : 'Actualizar Cotações' }}
+    </button>
+  </header>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <p>Carregando dados...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <app-portfolio-table></app-portfolio-table>
+  </div>
+</div>

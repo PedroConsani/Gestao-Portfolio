@@ -1,0 +1,13 @@
+<tr>
+  <td class="ticker">{{ stock.ticker }}</td>
+  <td class="empresa">{{ stock.empresa }}</td>
+  <td class="data">{{ stock.dataCompra }}</td>
+  <td class="numero">{{ stock.quantidade }}</td>
+  <td class="numero">{{ formatarMoeda(stock.precoCompra) }}</td>
+  <td class="numero" style="background-color: #bbdefb;">{{ formatarMoeda(stock.total) }}</td>
+  <td class="numero">{{ formatarMoeda(stock.cotacaoDia) }}</td>
+  <td class="numero" style="background-color: #bbdefb;">{{ formatarMoeda(stock.valor) }}</td>
+  <td class="numero variacao" [ngClass]="getVariacaoClass()">
+    {{ formatarVariacao(stock.variacao) }}%
+  </td>
+</tr>

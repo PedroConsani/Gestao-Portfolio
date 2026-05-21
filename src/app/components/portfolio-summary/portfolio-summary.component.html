@@ -1,0 +1,9 @@
+<tr class="total-row">
+  <td colspan="5" class="label">TOTAL</td>
+  <td class="numero">{{ formatarMoeda(portfolio.totalAquisicao) }}</td>
+  <td></td>
+  <td class="numero">{{ formatarMoeda(portfolio.totalValor) }}</td>
+  <td class="numero variacao" [ngClass]="getVariacaoClass()">
+    {{ formatarVariacao(portfolio.variacaoTotal) }}%
+  </td>
+</tr>

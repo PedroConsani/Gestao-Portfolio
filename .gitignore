@@ -1,0 +1,32 @@
+# Angular
+/node_modules
+/dist
+/out-tsc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+src/environments/environment.prod.ts
+
+# npm
+npm-debug.log*
+npm-err.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Build
+/tmp
+/temp
+*.log
+
+# Angular
+.angular/

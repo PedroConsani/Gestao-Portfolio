@@ -1,0 +1,21 @@
+{
+  "nome": "Minha Carteira de Ações",
+  "mercado": "NASDAQ",
+  "dataAtualizacao": "2026-05-21",
+  "stocks": [
+    {
+      "ticker": "MSFT",
+      "empresa": "Microsoft",
+      "dataCompra": "01/03/2026",
+      "quantidade": 20,
+      "precoCompra": 320.00
+    },
+    {
+      "ticker": "TSLA",
+      "empresa": "TESLA",
+      "dataCompra": "20/03/2026",
+      "quantidade": 50,
+      "precoCompra": 220.00
+    }
+  ]
+}

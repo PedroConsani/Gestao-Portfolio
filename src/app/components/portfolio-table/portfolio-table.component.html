@@ -1,0 +1,26 @@
+<div class="table-container" *ngIf="portfolio">
+  <table class="portfolio-table">
+    <thead>
+      <tr>
+        <th>Ticker</th>
+        <th>Empresa</th>
+        <th>Data da Compra</th>
+        <th>QT</th>
+        <th>PU</th>
+        <th>Total</th>
+        <th>Cotação do Dia</th>
+        <th>Valor</th>
+        <th>Variação (%)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <app-stock-row 
+        *ngFor="let stock of portfolio.stocks" 
+        [stock]="stock">
+      </app-stock-row>
+    </tbody>
+    <tfoot>
+      <app-portfolio-summary [portfolio]="portfolio"></app-portfolio-summary>
+    </tfoot>
+  </table>
+</div>

@@ -16,30 +16,37 @@ tr:hover {
 }
 
 td {
-  padding: 14px 12px;
+  padding: 14px 14px;
   vertical-align: middle;
+  box-sizing: border-box;
+  line-height: 1.4;
 }
 
 .ticker {
   font-weight: 700;
   color: var(--primary);
+  font-size: 0.9rem;
+  width: min-content;
 }
 
 .empresa {
   color: var(--text-primary);
   font-weight: 500;
+  font-size: 0.9rem;
+  width: 500px;
 }
 
 .data {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .numero {
   text-align: right;
   font-family: var(--font-data);
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   color: var(--text-primary);
+  padding-right: 88px;
 }
 
 /* Destaque das colunas calculadas pedidas no enunciado */

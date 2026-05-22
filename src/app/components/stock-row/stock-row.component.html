@@ -9,12 +9,12 @@
   <td class="numero font-mono">{{ formatarMoeda(stock.cotacaoDia) }}</td>
   <!-- Coluna Calculada: Valor (Verde) -->
   <td class="numero font-mono valor-col">{{ formatarMoeda(stock.valor) }}</td>
-  <td class="numero variacao-wrapper">
+  <td class="variacao-wrapper" style="text-align: center;">
     <span class="variacao-badge" [ngClass]="getVariacaoClass()">
       {{ formatarVariacao(stock.variacao) }}%
     </span>
   </td>
-  <td class="sparkline-wrapper">
+  <td class="sparkline-wrapper" style="text-align: center;">
     <svg class="sparkline-svg" width="70" height="24" [ngClass]="getVariacaoClass()">
       <polyline
         fill="none"

@@ -13,7 +13,7 @@
 }
 
 .total-row td {
-  padding: 18px 16px;
+  padding: 14px 12px;
   vertical-align: middle;
 }
 
@@ -41,10 +41,6 @@
 }
 
 /* Badge de variação total */
-.variacao-wrapper {
-  text-align: right;
-}
-
 .variacao-badge {
   display: inline-block;
   padding: 4px 10px;

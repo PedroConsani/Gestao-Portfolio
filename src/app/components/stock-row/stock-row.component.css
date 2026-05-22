@@ -16,14 +16,13 @@ tr:hover {
 }
 
 td {
-  padding: 16px;
+  padding: 14px 12px;
   vertical-align: middle;
 }
 
 .ticker {
   font-weight: 700;
   color: var(--primary);
-  letter-spacing: 0.5px;
 }
 
 .empresa {
@@ -57,10 +56,6 @@ td {
 }
 
 /* Variação Badges com glow estético */
-.variacao-wrapper {
-  text-align: right;
-}
-
 .variacao-badge {
   display: inline-block;
   padding: 4px 10px;

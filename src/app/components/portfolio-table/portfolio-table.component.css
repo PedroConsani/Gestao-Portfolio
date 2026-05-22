@@ -73,13 +73,88 @@
 
 .portfolio-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   text-align: left;
 }
 
+.portfolio-table th:nth-child(1),
+.portfolio-table td:nth-child(1) {
+  width: 8%;
+}
+
+/* Ticker */
+.portfolio-table th:nth-child(2),
+.portfolio-table td:nth-child(2) {
+  width: 12%;
+}
+
+/* Empresa */
+.portfolio-table th:nth-child(3),
+.portfolio-table td:nth-child(3) {
+  width: 11%;
+}
+
+/* Data Compra */
+.portfolio-table th:nth-child(4),
+.portfolio-table td:nth-child(4) {
+  width: 7%;
+}
+
+/* QT */
+.portfolio-table th:nth-child(5),
+.portfolio-table td:nth-child(5) {
+  width: 9%;
+}
+
+/* PU (USD) */
+.portfolio-table th:nth-child(6),
+.portfolio-table td:nth-child(6) {
+  width: 10%;
+}
+
+/* Total (USD) */
+.portfolio-table th:nth-child(7),
+.portfolio-table td:nth-child(7) {
+  width: 10%;
+}
+
+/* Cotação Dia */
+.portfolio-table th:nth-child(8),
+.portfolio-table td:nth-child(8) {
+  width: 10%;
+}
+
+/* Valor (USD) */
+.portfolio-table th:nth-child(9),
+.portfolio-table td:nth-child(9) {
+  width: 8%;
+}
+
+/* Variação (%) */
+.portfolio-table th:nth-child(10),
+.portfolio-table td:nth-child(10) {
+  width: 8%;
+}
+
+/* Sparkline/Tendência */
+.portfolio-table th:nth-child(11),
+.portfolio-table td:nth-child(11) {
+  width: 8%;
+  text-align: center;
+}
+
+.portfolio-table th.num,
+.portfolio-table td.num {
+  text-align: right;
+}
+
 /* Headers */
 .portfolio-table th {
-  padding: 18px 16px;
+  padding: 18px 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -87,6 +162,10 @@
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-color);
   background: rgba(22, 28, 45, 0.4);
+}
+
+.portfolio-table td {
+  padding: 14px 12px;
 }
 
 .portfolio-table th.sortable {
@@ -122,11 +201,17 @@
 
 /* Destaque das colunas calculadas do professor */
 .total-col {
-  color: #60a5fa !important; /* Azul */
+  color: #60a5fa !important;
+  /* Azul */
 }
 
 .valor-col {
-  color: #34d399 !important; /* Verde */
+  color: #34d399 !important;
+  /* Verde */
+}
+
+.chart-header {
+  text-align: center;
 }
 
 .actions-header {
@@ -142,6 +227,7 @@
 
 /* Responsive Table */
 @media (max-width: 992px) {
+
   .portfolio-table th,
   .portfolio-table td {
     padding: 14px 10px;

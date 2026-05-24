@@ -217,14 +217,24 @@ export class PortfolioService {
             observer.next(portfolio);
             observer.complete();
           } else {
-            // Fallback: carregar do ficheiro JSON
-            this.loadPortfolioFromFile('assets/data/portfolio.json').subscribe({
-              next: (p) => {
-                observer.next(p);
-                observer.complete();
-              },
-              error: (err) => observer.error(err)
-            });
+            // Fallback: criar carteira vazia localmente
+            const emptyPortfolio: Portfolio = {
+              nome: 'A minha carteira',
+              mercado: 'NASDAQ / NYSE',
+              dataAtualizacao: new Date().toISOString().split('T')[0],
+              stocks: [],
+              totalAquisicao: 0,
+              totalValor: 0,
+              variacaoTotal: 0
+            };
+            this.portfolioSubject.next(emptyPortfolio);
+            try {
+              localStorage.setItem('portfolio_app_data', JSON.stringify(emptyPortfolio));
+            } catch (e) {
+              console.error('Erro ao guardar no localStorage:', e);
+            }
+            observer.next(emptyPortfolio);
+            observer.complete();
           }
         },
         error: (err) => {

@@ -159,20 +159,20 @@ export class PortfolioPageComponent implements OnInit {
   }
 
   /**
-   * Reinicia a carteira para o estado padrão
+   * Reinicia a carteira para o estado padrão (zerada)
    */
   resetPortfolio(): void {
-    if (confirm('Tem a certeza que deseja repor a carteira padrão? Isto apagará todas as edições.')) {
+    if (confirm('Tem a certeza que deseja zerar a carteira de ações? Isto removerá todas as ações.')) {
       this.isLoading = true;
       this.portfolioService.resetPortfolio().subscribe({
         next: () => {
           this.isLoading = false;
           this.updateQuotes();
-          this.showSuccess('Carteira restaurada para o padrão!');
+          this.showSuccess('Carteira de ações zerada com sucesso!');
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = 'Erro ao restaurar carteira: ' + (err.message || err);
+          this.errorMessage = 'Erro ao zerar carteira: ' + (err.message || err);
         }
       });
     }

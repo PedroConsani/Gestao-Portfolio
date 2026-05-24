@@ -167,22 +167,30 @@ router.delete('/portfolio/stocks/:ticker', async (req, res) => {
 
 /**
  * POST /api/portfolio/reset
- * Repõe a carteira para os dados padrão.
+ * Repõe a carteira para um estado vazio (zerar carteira).
  */
 router.post('/portfolio/reset', async (req, res) => {
   try {
     // Apagar todas as carteiras existentes
     await Portfolio.deleteMany({});
 
-    // Criar nova com dados padrão
-    const portfolio = new Portfolio(DEFAULT_PORTFOLIO);
+    // Criar nova carteira vazia (zerada)
+    const portfolio = new Portfolio({
+      nome: 'A minha carteira',
+      mercado: 'NASDAQ / NYSE',
+      dataAtualizacao: new Date().toISOString().split('T')[0],
+      stocks: [],
+      totalAquisicao: 0,
+      totalValor: 0,
+      variacaoTotal: 0
+    });
     await portfolio.save();
 
-    console.log('🔄 Carteira reposta para os dados padrão');
+    console.log('🔄 Carteira zerada com sucesso');
     res.json(portfolio);
   } catch (error) {
-    console.error('Erro ao repor carteira:', error);
-    res.status(500).json({ error: 'Erro ao repor carteira', message: error.message });
+    console.error('Erro ao zerar carteira:', error);
+    res.status(500).json({ error: 'Erro ao zerar carteira', message: error.message });
   }
 });
 
